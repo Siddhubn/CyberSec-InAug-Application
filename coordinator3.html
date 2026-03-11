@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Club Coordinator Authentication 3 - CyberSec Club</title>
+  <link rel="stylesheet" href="style/cyberpunk.css">
+</head>
+<body class="cyber-bg">
+  <div class="auth-container">
+    <h1 class="cyber-title">Club Coordinator Authentication 3</h1>
+    <div class="fingerprint-scan" id="scanBtn">
+      <div class="fingerprint-icon"></div>
+      <div class="scan-circle" id="scanCircle"></div>
+    </div>
+    <div id="authStatus" class="auth-status"></div>
+  </div>
+  <script>
+    const scanBtn = document.getElementById('scanBtn');
+    const scanCircle = document.getElementById('scanCircle');
+    const authStatus = document.getElementById('authStatus');
+    let scanning = false, timer;
+    function vibrate(ms) { if (navigator.vibrate) navigator.vibrate(ms); }
+    scanBtn.addEventListener('touchstart', startScan);
+    scanBtn.addEventListener('mousedown', startScan);
+    scanBtn.addEventListener('touchend', stopScan);
+    scanBtn.addEventListener('mouseup', stopScan);
+    scanBtn.addEventListener('mouseleave', stopScan);
+    function startScan(e) {
+      if (scanning) return;
+      scanning = true;
+      scanCircle.classList.add('scanning');
+      vibrate(5000);
+      timer = setTimeout(() => {
+        scanCircle.classList.remove('scanning');
+        scanCircle.classList.add('success');
+        fetch('http://' + location.hostname + ':5000/auth/coordinator3', {method:'POST'})
+          .then(r => r.json())
+          .then(data => {
+            if (data.success) {
+              authStatus.innerHTML = '<span class="glow-success">Coordinator 3 Authorized ✅</span>';
+            }
+          });
+      }, 5000);
+    }
+    function stopScan(e) {
+      if (!scanning) return;
+      scanning = false;
+      scanCircle.classList.remove('scanning');
+      clearTimeout(timer);
+      vibrate(0);
+    }
+  </script>
+</body>
+</html>
